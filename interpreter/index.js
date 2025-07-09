@@ -9,6 +9,7 @@ const GT = "GT";
 const EQ = "EQ";
 const AND = "AND";
 const OR = "OR";
+const JUMP = "JUMP";
 
 class Interpreter {
   constructor() {
@@ -59,6 +60,12 @@ class Interpreter {
 
             this.state.stack.push(result);
             break;
+          case JUMP:
+            const destination = this.state.stack.pop();
+
+            this.state.programCounter = destination;
+            this.state.programCounter--;
+            break;
           default:
             break;
         }
@@ -106,3 +113,7 @@ console.log("Result of 3 AND 2:", result);
 code = [PUSH, 2, PUSH, 3, OR, STOP];
 result = new Interpreter().runCode(code);
 console.log("Result of 3 OR 2:", result);
+
+code = [PUSH, 6, JUMP, PUSH, 0, JUMP, PUSH, "jump successful", STOP];
+result = new Interpreter().runCode(code);
+console.log("result of JUMP:", result);
