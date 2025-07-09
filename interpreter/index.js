@@ -12,6 +12,22 @@ const OR = "OR";
 const JUMP = "JUMP";
 const JUMPI = "JUMPI";
 
+const OPCODE_MAP = {
+  STOP,
+  PUSH,
+  ADD,
+  SUB,
+  MUL,
+  DIV,
+  LT,
+  GT,
+  EQ,
+  AND,
+  OR,
+  JUMP,
+  JUMPI,
+};
+
 const EXECUTION_COMPLETE = "Execution complete";
 const EXECUTION_LIMIT = 10000;
 
@@ -114,67 +130,70 @@ class Interpreter {
   }
 }
 
-let code = [PUSH, 2, PUSH, 3, ADD, STOP];
-let result = new Interpreter().runCode(code);
-console.log("Result of 3 ADD 2:", result);
+Interpreter.OPCODE_MAP = OPCODE_MAP;
+module.exports = Interpreter;
 
-code = [PUSH, 2, PUSH, 3, SUB, STOP];
-result = new Interpreter().runCode(code);
-console.log("Result of 3 SUB 2:", result);
+// let code = [PUSH, 2, PUSH, 3, ADD, STOP];
+// let result = new Interpreter().runCode(code);
+// console.log("Result of 3 ADD 2:", result);
 
-code = [PUSH, 2, PUSH, 3, MUL, STOP];
-result = new Interpreter().runCode(code);
-console.log("Result of 3 MUL 2:", result);
+// code = [PUSH, 2, PUSH, 3, SUB, STOP];
+// result = new Interpreter().runCode(code);
+// console.log("Result of 3 SUB 2:", result);
 
-code = [PUSH, 2, PUSH, 3, DIV, STOP];
-result = new Interpreter().runCode(code);
-console.log("Result of 3 DIV 2:", result);
+// code = [PUSH, 2, PUSH, 3, MUL, STOP];
+// result = new Interpreter().runCode(code);
+// console.log("Result of 3 MUL 2:", result);
 
-code = [PUSH, 2, PUSH, 3, LT, STOP];
-result = new Interpreter().runCode(code);
-console.log("Result of 3 LT 2:", result);
+// code = [PUSH, 2, PUSH, 3, DIV, STOP];
+// result = new Interpreter().runCode(code);
+// console.log("Result of 3 DIV 2:", result);
 
-code = [PUSH, 2, PUSH, 3, GT, STOP];
-result = new Interpreter().runCode(code);
-console.log("Result of 3 GT 2:", result);
+// code = [PUSH, 2, PUSH, 3, LT, STOP];
+// result = new Interpreter().runCode(code);
+// console.log("Result of 3 LT 2:", result);
 
-code = [PUSH, 2, PUSH, 3, EQ, STOP];
-result = new Interpreter().runCode(code);
-console.log("Result of 3 EQ 2:", result);
+// code = [PUSH, 2, PUSH, 3, GT, STOP];
+// result = new Interpreter().runCode(code);
+// console.log("Result of 3 GT 2:", result);
 
-code = [PUSH, 2, PUSH, 3, AND, STOP];
-result = new Interpreter().runCode(code);
-console.log("Result of 3 AND 2:", result);
+// code = [PUSH, 2, PUSH, 3, EQ, STOP];
+// result = new Interpreter().runCode(code);
+// console.log("Result of 3 EQ 2:", result);
 
-code = [PUSH, 2, PUSH, 3, OR, STOP];
-result = new Interpreter().runCode(code);
-console.log("Result of 3 OR 2:", result);
+// code = [PUSH, 2, PUSH, 3, AND, STOP];
+// result = new Interpreter().runCode(code);
+// console.log("Result of 3 AND 2:", result);
 
-code = [PUSH, 6, JUMP, PUSH, 0, JUMP, PUSH, "jump successful", STOP];
-result = new Interpreter().runCode(code);
-console.log("result of JUMP:", result);
+// code = [PUSH, 2, PUSH, 3, OR, STOP];
+// result = new Interpreter().runCode(code);
+// console.log("Result of 3 OR 2:", result);
 
-code = [PUSH, 8, PUSH, 1, JUMPI, PUSH, 0, JUMP, PUSH, "jump successful", STOP];
-result = new Interpreter().runCode(code);
-console.log("result of JUMPI:", result);
+// code = [PUSH, 6, JUMP, PUSH, 0, JUMP, PUSH, "jump successful", STOP];
+// result = new Interpreter().runCode(code);
+// console.log("result of JUMP:", result);
 
-code = [PUSH, 99, PUSH, 1, JUMPI, PUSH, 0, JUMP, PUSH, "jump successful", STOP];
-try {
-  result = new Interpreter().runCode(code);
-} catch (error) {
-  console.log("Invalid destination error:", error.message);
-}
+// code = [PUSH, 8, PUSH, 1, JUMPI, PUSH, 0, JUMP, PUSH, "jump successful", STOP];
+// result = new Interpreter().runCode(code);
+// console.log("result of JUMPI:", result);
 
-code = [PUSH, 0, PUSH];
-try {
-  result = new Interpreter().runCode(code);
-} catch (error) {
-  console.log("Expected invalid PUSH error:", error.message);
-}
+// code = [PUSH, 99, PUSH, 1, JUMPI, PUSH, 0, JUMP, PUSH, "jump successful", STOP];
+// try {
+//   result = new Interpreter().runCode(code);
+// } catch (error) {
+//   console.log("Invalid destination error:", error.message);
+// }
 
-code = [PUSH, 0, JUMP, STOP];
-try {
-  result = new Interpreter().runCode(code);
-} catch (error) {
-  console.log("Infinite invalid execution error:", error.message);
-}
+// code = [PUSH, 0, PUSH];
+// try {
+//   result = new Interpreter().runCode(code);
+// } catch (error) {
+//   console.log("Expected invalid PUSH error:", error.message);
+// }
+
+// code = [PUSH, 0, JUMP, STOP];
+// try {
+//   result = new Interpreter().runCode(code);
+// } catch (error) {
+//   console.log("Infinite invalid execution error:", error.message);
+// }
