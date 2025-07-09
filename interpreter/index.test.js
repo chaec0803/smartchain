@@ -130,5 +130,21 @@ describe("Interpreter", () => {
         ).toThrow("Invalid destination: 99");
       });
     });
+
+    describe("and the code includes an invalid PUSH value", () => {
+      it("throws an error", () => {
+        expect(() => new Interpreter().runCode([PUSH, 0, PUSH])).toThrow(
+          "The 'PUSH' instruction cannot be last."
+        );
+      });
+    });
+
+    describe("and the code includes an infinite loop", () => {
+      it("throws an error", () => {
+        expect(() => new Interpreter().runCode([PUSH, 0, JUMP, STOP])).toThrow(
+          "Check for an infinite loop. Execution limit of 10000 exceeded"
+        );
+      });
+    });
   });
 });
