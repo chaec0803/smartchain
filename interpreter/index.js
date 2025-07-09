@@ -4,6 +4,11 @@ const ADD = "ADD";
 const SUB = "SUB";
 const MUL = "MUL";
 const DIV = "DIV";
+const LT = "LT";
+const GT = "GT";
+const EQ = "EQ";
+const AND = "AND";
+const OR = "OR";
 
 class Interpreter {
   constructor() {
@@ -33,6 +38,11 @@ class Interpreter {
           case SUB:
           case MUL:
           case DIV:
+          case LT:
+          case GT:
+          case EQ:
+          case AND:
+          case OR:
             const a = this.state.stack.pop();
             const b = this.state.stack.pop();
 
@@ -41,6 +51,11 @@ class Interpreter {
             if (opCode === SUB) result = a - b;
             if (opCode === MUL) result = a * b;
             if (opCode === DIV) result = a / b;
+            if (opCode === LT) result = (a < b) | 0;
+            if (opCode === GT) result = (a > b) | 0;
+            if (opCode === EQ) result = (a === b) | 0;
+            if (opCode === AND) result = a && b;
+            if (opCode === OR) result = a || b;
 
             this.state.stack.push(result);
             break;
@@ -71,3 +86,23 @@ console.log("Result of 3 MUL 2:", result);
 code = [PUSH, 2, PUSH, 3, DIV, STOP];
 result = new Interpreter().runCode(code);
 console.log("Result of 3 DIV 2:", result);
+
+code = [PUSH, 2, PUSH, 3, LT, STOP];
+result = new Interpreter().runCode(code);
+console.log("Result of 3 LT 2:", result);
+
+code = [PUSH, 2, PUSH, 3, GT, STOP];
+result = new Interpreter().runCode(code);
+console.log("Result of 3 GT 2:", result);
+
+code = [PUSH, 2, PUSH, 3, EQ, STOP];
+result = new Interpreter().runCode(code);
+console.log("Result of 3 EQ 2:", result);
+
+code = [PUSH, 2, PUSH, 3, AND, STOP];
+result = new Interpreter().runCode(code);
+console.log("Result of 3 AND 2:", result);
+
+code = [PUSH, 2, PUSH, 3, OR, STOP];
+result = new Interpreter().runCode(code);
+console.log("Result of 3 OR 2:", result);
