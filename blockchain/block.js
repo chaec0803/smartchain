@@ -1,5 +1,5 @@
 const { keccakHash } = require('../util');
-const { GENESIS_DATA } = require('../config')
+const { GENESIS_DATA, MINE_RATE } = require('../config')
 
 const HASH_LENGTH = 64;
 const MAX_HASH_VALUE = parseInt('f'.repeat(HASH_LENGTH), 16);
@@ -20,6 +20,19 @@ class Block {
         return '0'.repeat(HASH_LENGTH - value.length) + value;
     }
 
+    static adjustDifficulty({ lastBlock, timestamp }) {
+        const { difficulty } = lastBlock.blockHeaders;
+
+        // if it took long to mine the last block, make this block easier to mine
+        if ((timestamp - lastBlock.blockHeaders.timestamp) > MINE_RATE) {
+            return difficulty - 1;
+        }
+
+        if (difficulty < 1) { return 1; };
+
+        return difficulty + 1;
+    }
+
     static mineBlock({ lastBlock, beneficiary }) {
         const target = Block.calculateBlockTargetHash({ lastBlock });
 
@@ -30,7 +43,7 @@ class Block {
             truncatedBlockHeaders = {
                 parentHash: keccakHash(lastBlock.blockHeaders),
                 beneficiary,
-                difficulty: lastBlock.blockHeaders.difficulty + 1,
+                difficulty: Block.adjustDifficulty({ lastBlock, timestamp }),
                 number: lastBlock.blockHeaders.number + 1,
                 timestamp,
             };
@@ -38,7 +51,7 @@ class Block {
             nonce = Math.floor(Math.random() * MAX_NONCE_VALUE) + 1;
 
             underTargetHash = keccakHash(header + nonce);
-        } while (underTargetHash >= target);
+        } while (underTargetHash > target);
 
         return new this({
             blockHeaders: { ...truncatedBlockHeaders, nonce }
@@ -49,13 +62,51 @@ class Block {
     static genesis() {
         return new this(GENESIS_DATA);
     }
+
+    static validateBlock({ lastBlock, block }) {
+        return new Promise((resolve, reject) => {
+            if (keccakHash(block) === keccakHash(Block.genesis())) {
+                return resolve();
+            }
+
+            if (keccakHash(lastBlock.blockHeaders) !== block.blockHeaders.parentHash) {
+                return reject(
+                    new Error("The parent hash must be a hash of the last block's headers")
+                );
+            };
+
+            if (block.blockHeaders.number !== lastBlock.blockHeaders.number + 1) {
+                return reject(
+                    new Error("The block must increment the number by 1")
+                );
+            };
+
+            if (Math.abs(lastBlock.blockHeaders.difficulty - block.blockHeaders.difficulty) > 1) {
+                return reject(
+                    new Error("The difficulty must only adjust by 1")
+                );
+            };
+
+            const target = Block.calculateBlockTargetHash({ lastBlock });
+
+            const { blockHeaders } = block;
+            const { nonce } = blockHeaders;
+            const truncatedBlockHeaders = { ...blockHeaders };
+            delete truncatedBlockHeaders.nonce;
+
+            const header = keccakHash(truncatedBlockHeaders);
+
+            const underTargetHash = keccakHash(header + nonce);
+
+            if (underTargetHash > target) {
+                return reject(
+                    new Error("The block does not meet the proof of work requirement")
+                );
+            };
+
+            return resolve();
+        });
+    }
 }
 
 module.exports = Block;
-
-
-/**Term	What It Is
-Current Block:	The block you're trying to mine now
-Target Hash:	The threshold value determined by difficulty
-Under Target Hash:	The hash of your current block header, 
-                    if it's less than the target */
