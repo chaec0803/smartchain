@@ -4,13 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "nodemon ./api",
+    "start": "node ./api",
     "test": "jest --watchAll"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^5.1.0",
     "jest": "^30.0.4",
-    "js-sha3": "^0.9.3"
+    "js-sha3": "^0.9.3",
+    "pubnub": "^9.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
