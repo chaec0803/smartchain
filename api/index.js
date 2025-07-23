@@ -20,7 +20,7 @@ app.get("/blockchain/mine", (req, res, next) => {
   blockchain
     .addBlock({ block })
     .then(() => {
-      pubsub.broadcastBlock(block);
+      pubsub.broadcastBlock(block); //any node listening will add this to their own chain
       res.json({ block });
     })
     .catch(next);
