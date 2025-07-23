@@ -1,35 +1,39 @@
-const express = require('express');
-const Blockchain = require('../blockchain');
-const Block = require('../blockchain/block');
+const express = require("express");
+const Blockchain = require("../blockchain");
+const Block = require("../blockchain/block");
+const PubSub = require("./pubsub");
 
 const app = express();
 const blockchain = new Blockchain();
+const pubsub = new PubSub({ blockchain });
 
-app.get('/blockchain', (req, res, next) => {
-    const { chain } = blockchain;
+app.get("/blockchain", (req, res, next) => {
+  const { chain } = blockchain;
 
-    res.json({ chain });
+  res.json({ chain });
 });
 
-app.get('/blockchain/mine', (req, res, next) => {
-    const lastBlock = blockchain.chain[blockchain.chain.length - 1];
-    const block = Block.mineBlock({ lastBlock });
+app.get("/blockchain/mine", (req, res, next) => {
+  const lastBlock = blockchain.chain[blockchain.chain.length - 1];
+  const block = Block.mineBlock({ lastBlock });
 
-    block.blockHeaders.parentHash = 'foo';
-
-    blockchain.addBlock({ block })
-        .then(() => {
-            res.json({ block });
-        })
-        .catch(next);
+  blockchain
+    .addBlock({ block })
+    .then(() => {
+      pubsub.broadcastBlock(block);
+      res.json({ block });
+    })
+    .catch(next);
 });
 
 app.use((err, req, res, next) => {
-    console.error('Internal Server Error:', err);
+  console.error("Internal Server Error:", err);
 
-    res.status(500).json({ message: err.message });
-})
+  res.status(500).json({ message: err.message });
+});
 
+const PORT = process.argv.includes("--peer")
+  ? Math.floor(2000 + Math.random() * 1000)
+  : 3000;
 
-const PORT = 3000
 app.listen(PORT, () => console.log(`listeining at PORT: ${PORT}`));
