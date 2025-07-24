@@ -13,7 +13,7 @@ class Blockchain {
             }).then(() => {
                 this.chain.push(block);
 
-                return resolve();
+                return resolve(); //return resolve for promise immediately
             }).catch(reject);
         });
     }
@@ -35,7 +35,7 @@ class Blockchain {
 
             this.chain = chain;
 
-            return resolve();
+            return resolve(); //return resolve for promise after for loop finishes
         });
     }
 }

@@ -1,15 +1,22 @@
 const {ec, keccakHash} = require('../util');
-const {STARTING_BALANCE} = require('../config');
+const {START_BALANCE} = require('../config');
 
 class Account {
     constructor(){
         this.keyPair = ec.genKeyPair();
         this.address = this.keyPair.getPublic().encode('hex');
-        this.balance = STARTING_BALANCE;
+        this.balance = START_BALANCE;
     }
 
     sign(data) {
         return this.keyPair.sign(keccakHash(data));
+    }
+
+    toJSON(){
+        return{
+            balance: this.balance,
+            address: this.address,
+        }
     }
 
     static verifySignature({publicKey, data, signature}){
