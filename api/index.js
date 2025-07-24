@@ -42,8 +42,10 @@ if (peer){
   request('http://localhost:3000/blockchain', (error, response, body) => {
     const { chain } = JSON.parse(body);
   
-    console.log('chain', chain)
-  });
+    blockchain.replaceChain({chain})
+      .then(()=> console.log('Synchronized blockchain with the root node'))
+      .catch((err) => console.log('Synchronization error', err.message));
+    });
 }
 
 app.listen(PORT, () => console.log(`listeining at PORT: ${PORT}`));

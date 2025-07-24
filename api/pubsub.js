@@ -41,6 +41,7 @@ class PubSub {
         switch (channel) {
           case CHANNELS_MAP.BLOCK:
             console.log("block message", message);
+
             this.blockchain
               .addBlock({ block: parsedMessage })
               .then(() => console.log("New block accepted"))
