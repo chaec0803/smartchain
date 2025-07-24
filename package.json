@@ -9,10 +9,14 @@
     "start": "node ./api",
     "test": "jest --watchAll"
   },
+  "jest": {
+    "testEnvironment": "node"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "elliptic": "^6.6.1",
     "express": "^5.1.0",
     "jest": "^30.0.4",
     "js-sha3": "^0.9.3",
