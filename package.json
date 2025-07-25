@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "api-test": "node ./api-test.js",
     "dev": "nodemon ./api",
     "dev-peer": "nodemon ./api --peer",
     "start": "node ./api",
@@ -16,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^2.2.0",
     "elliptic": "^6.6.1",
     "express": "^5.1.0",
     "jest": "^30.0.4",
