@@ -29,6 +29,8 @@ const getMine = () => {
   })
 }
 
+let toAccountData;
+
 postTransact({})
   .then((postTransactionResponse) => {
     console.log(
@@ -36,8 +38,14 @@ postTransact({})
       postTransactionResponse
     );
 
-    const toAccountData = postTransactionResponse.transaction.data.accountData;
+    toAccountData = postTransactionResponse.transaction.data.accountData;
+    
+    return getMine();
+  }).then(getMineResponse => {
+    console.log('getMineResponse', getMineResponse);
+
     return postTransact({ to: toAccountData.address, value: 20 })
+  })
       .then((postTransactionResponse2) => {
         console.log(
           "postTransactionResponse2 (Standard Transaction)",
@@ -46,14 +54,9 @@ postTransact({})
 
         return getMine();
       })
-      .then(getMineResponse => {
-        console.log(getMineResponse);
+      .then(getMineResponse2 => {
+        console.log(getMineResponse2);
       })
-      .catch((err) => {
-        console.error("Transaction failed:", err);
-      });
-  })
   .catch((err) => {
     console.error("Transaction failed:", err);
   });
-
