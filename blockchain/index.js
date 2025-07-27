@@ -5,7 +5,7 @@ class Blockchain {
         this.chain = [Block.genesis()];
     }
 
-    addBlock({ block }) {
+    addBlock({ block, transactionQueue }) {
         return new Promise((resolve, reject) => {
             Block.validateBlock({
                 lastBlock: this.chain[this.chain.length - 1],
@@ -13,20 +13,23 @@ class Blockchain {
             }).then(() => {
                 this.chain.push(block);
 
+                transactionQueue.clearBlockTransactions({
+                    transactionSeries: block.transactionSeries
+                })
                 return resolve(); //return resolve for promise immediately
             }).catch(reject);
         });
     }
 
-    replaceChain({chain}){
+    replaceChain({ chain }) {
         return new Promise(async (resolve, reject) => {
-            for(let i=0; i<chain.length;i++){
+            for (let i = 0; i < chain.length; i++) {
                 const block = chain[i];
                 const lastBlock = i == 0 ? null : chain[i - 1];
 
                 try {
                     await Block.validateBlock({ lastBlock, block })
-                } catch (error){
+                } catch (error) {
                     return reject(error);
                 }
 

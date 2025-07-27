@@ -1,4 +1,5 @@
 const PubNub = require("pubnub");
+const Transaction = require('../transaction');
 
 const credentials = {
     publishKey: "pub-c-cb28fb52-fed6-457b-8b5a-bca5d0d34617",
@@ -45,8 +46,8 @@ class PubSub {
                         console.log("block message", message);
 
                         this.blockchain
-                            .addBlock({ block: parsedMessage })
-                            .then(() => console.log("New block accepted"))
+                            .addBlock({ block: parsedMessage, transactionQueue: transactionQueue })
+                            .then(() => console.log("New block accepted", parsedMessage))
                             .catch((error) =>
                                 console.error("New block rejected:", error.message)
                             );
@@ -70,7 +71,7 @@ class PubSub {
         });
     }
 
-    broadcastBlock(transaction) {
+    broadcastTransaction(transaction) {
         this.publish({
             channel: CHANNELS_MAP.TRANSACTION,
             message: JSON.stringify(transaction),
