@@ -13,7 +13,7 @@ const app = express();
 app.use(bodyParser.json());
 
 const state = new State();
-const blockchain = new Blockchain({state});
+const blockchain = new Blockchain({ state });
 const transactionQueue = new TransactionQueue();
 const pubsub = new PubSub({ blockchain, transactionQueue });
 const account = new Account();
@@ -36,11 +36,11 @@ app.get("/blockchain", (req, res, next) => {
 
 app.get("/blockchain/mine", (req, res, next) => {
   const lastBlock = blockchain.chain[blockchain.chain.length - 1];
-  const block = Block.mineBlock({ 
-    lastBlock, 
-    beneficiary: account.address, 
+  const block = Block.mineBlock({
+    lastBlock,
+    beneficiary: account.address,
     transactionSeries: transactionQueue.getTransactionSeries(),
-    stateRoot: state.getStateRoot()
+    stateRoot: state.getStateRoot(),
   });
 
   blockchain
@@ -62,6 +62,16 @@ app.post("/account/transact", (req, res, next) => {
   pubsub.broadcastTransaction(transaction);
 
   res.json({ transaction });
+});
+
+app.get("/account/balance", (req, res, next) => {
+  const { address } = req.query;
+  const targetAddress = address || account.address;
+
+  const accountData = state.getAccount({ address: targetAddress });
+
+  const balance = accountData.balance;
+  res.json({ balance });
 });
 
 app.use((err, req, res, next) => {

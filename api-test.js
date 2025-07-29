@@ -23,11 +23,21 @@ const getMine = () => {
     setTimeout(() => {
       request(`${BASE_URL}/blockchain/mine`, (error, response, body) => {
         return resolve(JSON.parse(body));
-      })
-    }, 1000)
+      });
+    }, 1000);
+  });
+};
 
-  })
-}
+const getAccountBalance = ({ address } = {}) => {
+  return new Promise((resolve, reject) => {
+    request(
+      `${BASE_URL}/account/balance` + (address ? `?address=${address}` : ""),
+      (error, response, body) => {
+        return resolve(JSON.parse(body));
+      }
+    );
+  });
+};
 
 let toAccountData;
 
@@ -39,24 +49,32 @@ postTransact({})
     );
 
     toAccountData = postTransactionResponse.transaction.data.accountData;
-    
+
     return getMine();
-  }).then(getMineResponse => {
-    console.log('getMineResponse', getMineResponse);
-
-    return postTransact({ to: toAccountData.address, value: 20 })
   })
-      .then((postTransactionResponse2) => {
-        console.log(
-          "postTransactionResponse2 (Standard Transaction)",
-          postTransactionResponse2
-        );
+  .then((getMineResponse) => {
+    console.log("getMineResponse", getMineResponse);
 
-        return getMine();
-      })
-      .then(getMineResponse2 => {
-        console.log(getMineResponse2);
-      })
-  .catch((err) => {
-    console.error("Transaction failed:", err);
+    return postTransact({ to: toAccountData.address, value: 20 });
+  })
+  .then((postTransactionResponse2) => {
+    console.log(
+      "postTransactionResponse2 (Standard Transaction)",
+      postTransactionResponse2
+    );
+
+    return getMine();
+  })
+  .then((getMineResponse2) => {
+    console.log("getMineResponse2", getMineResponse2);
+
+    return getAccountBalance();
+  })
+  .then((getAccountBalanceResponse) => {
+    console.log("getAccountBalanceResponse", getAccountBalanceResponse);
+
+    return getAccountBalance({ address: toAccountData.address });
+  })
+  .then((getAccountBalanceResponse2) => {
+    console.log("getAccountBalanceResponse2", getAccountBalanceResponse2);
   });
