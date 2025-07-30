@@ -117,7 +117,9 @@ class Block {
                 transactionSeries: block.transactionSeries,
                 state
             })
-
+            .then(resolve)
+            .catch(reject)
+            
             return resolve();
         });
     }
