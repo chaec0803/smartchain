@@ -7,8 +7,9 @@ const GENESIS_DATA = {
         timestamp: '--genesis-timestamp--',
         nonce: 0,
         transactionsRoot: '--genesis-transactions-root-',
-        stateRoot: '--genesis-state-root--'
-    }
+        stateRoot: '--genesis-state-root--',
+    },
+    transactionSeries: []
 };
 
 const MILLISECONDS = 1;
@@ -16,8 +17,10 @@ const SECONDS = 1000 * MILLISECONDS;
 const MINE_RATE = 13 * SECONDS;
 
 const START_BALANCE = 1000;
+const MINING_REWARD = 50;
 module.exports = {
     GENESIS_DATA,
     MINE_RATE,
     START_BALANCE,
+    MINING_REWARD,
 };

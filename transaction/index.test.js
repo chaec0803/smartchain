@@ -3,7 +3,12 @@ const Account = require("../account");
 const State = require("../store/state");
 
 describe("Transaction", () => {
-  let account, standardTransaction, createAccountTransaction, state, toAccount;
+  let account;
+  let standardTransaction;
+  let createAccountTransaction;
+  let miningRewardTransaction;
+  let state;
+  let toAccount;
 
   beforeEach(() => {
     account = new Account();
@@ -17,9 +22,14 @@ describe("Transaction", () => {
       to: toAccount.address,
       value: 50,
     });
+    
     createAccountTransaction = Transaction.createTransaction({
       account,
     });
+
+    miningRewardTransaction = Transaction.createTransaction({
+      beneficiary: account.address
+    })
   });
 
   describe("validateStandardTransaction()", () => {
@@ -42,26 +52,8 @@ describe("Transaction", () => {
         })
       ).rejects.toMatchObject({ message: /invalid/ });
     });
-  });
 
-  describe("validateCreateAccountTransaction()", () => {
-    it("validates a valid transaction", () => {
-      expect(
-        Transaction.validateCreateAccountTransaction({
-          transaction: createAccountTransaction,
-        })
-      ).resolves;
-    });
-
-    it("does not validate a malformed transaction", () => {
-      expect(
-        Transaction.validateCreateAccountTransaction({
-          transaction: standardTransaction,
-        })
-      ).rejects.toMatchObject({ message: /incorrect/ });
-    });
-
-    it('does not validate when the value exceeds the balance', ()=> {
+     it('does not validate when the value exceeds the balance', ()=> {
       standardTransaction = Transaction.createTransaction({
         account,
         to: toAccount.address,
@@ -85,4 +77,37 @@ describe("Transaction", () => {
       })).rejects.toMatchObject({message: /does not exist/ })
     })
   });
+
+  describe("validateCreateAccountTransaction()", () => {
+    it("validates a valid transaction", () => {
+      expect(
+        Transaction.validateCreateAccountTransaction({
+          transaction: createAccountTransaction,
+        })
+      ).resolves;
+    });
+
+    it("does not validate a malformed transaction", () => {
+      expect(
+        Transaction.validateCreateAccountTransaction({
+          transaction: standardTransaction,
+        })
+      ).rejects.toMatchObject({ message: /incorrect/ });
+    });
+
+   
+  });
+
+  describe("validate mining reward transaction", ()=> {
+    it("validates a mining reward transaction", ()=> {
+      expect(Transaction.validateMiningRewardTransaction({transaction: miningRewardTransaction})).resolves;
+    });
+
+    it("does not validate a mining reward transaction that was tampered with", ()=> {
+      miningRewardTransaction.value = 9001;
+      expect(Transaction.validateMiningRewardTransaction({transaction: miningRewardTransaction})).rejects.toMatchObject({message: /does not equal the official/})
+    });
+
+
+  })
 });

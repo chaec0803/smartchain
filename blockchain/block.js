@@ -42,8 +42,13 @@ class Block {
         transactionSeries,
         stateRoot }) {
         const target = Block.calculateBlockTargetHash({ lastBlock });
+        
+        const miningRewardTransaction = Transaction.createTransaction({beneficiary});
+        transactionSeries.push(miningRewardTransaction);
+
         const transactionsTrie = Trie.buildTrie({items: transactionSeries});
         let timestamp, truncatedBlockHeaders, header, nonce, underTargetHash;
+
 
         do {
             timestamp = Date.now();
@@ -62,6 +67,7 @@ class Block {
             underTargetHash = keccakHash(header + nonce);
         } while (underTargetHash > target);
 
+         
         return new this({
             blockHeaders: { ...truncatedBlockHeaders, nonce },
             transactionSeries
