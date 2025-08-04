@@ -1,19 +1,35 @@
 const Transaction = require("./index");
 const Account = require("../account");
+const State = require("../store/state");
 
 describe("Transaction", () => {
-  let account, standardTransaction, createAccountTransaction;
+  let account;
+  let standardTransaction;
+  let createAccountTransaction;
+  let miningRewardTransaction;
+  let state;
+  let toAccount;
 
   beforeEach(() => {
     account = new Account();
+    toAccount = new Account();
+    state = new State();
+    state.putAccount({address: account.address, accountData: account})
+    state.putAccount({address: toAccount.address, accountData: toAccount})
+
     standardTransaction = Transaction.createTransaction({
       account,
-      to: "foo-recepient",
+      to: toAccount.address,
       value: 50,
     });
+    
     createAccountTransaction = Transaction.createTransaction({
       account,
     });
+
+    miningRewardTransaction = Transaction.createTransaction({
+      beneficiary: account.address
+    })
   });
 
   describe("validateStandardTransaction()", () => {
@@ -21,6 +37,7 @@ describe("Transaction", () => {
       expect(
         Transaction.validateStandardTransaction({
           transaction: standardTransaction,
+          state
         })
       ).resolves;
     });
@@ -31,9 +48,34 @@ describe("Transaction", () => {
       expect(
         Transaction.validateStandardTransaction({
           transaction: standardTransaction,
+          state
         })
       ).rejects.toMatchObject({ message: /invalid/ });
     });
+
+     it('does not validate when the value exceeds the balance', ()=> {
+      standardTransaction = Transaction.createTransaction({
+        account,
+        to: toAccount.address,
+        value: 9001
+      });
+      expect(Transaction.validateStandardTransaction({
+        transaction: standardTransaction,
+        state
+      })).rejects.toMatchObject({message: /exceeds/ })
+    })
+
+    it('does not validate when the `to` address does not exist', ()=> {
+      standardTransaction = Transaction.createTransaction({
+        account,
+        to: "foo-recepient",
+        value: 10
+      });
+      expect(Transaction.validateStandardTransaction({
+        transaction: standardTransaction,
+        state
+      })).rejects.toMatchObject({message: /does not exist/ })
+    })
   });
 
   describe("validateCreateAccountTransaction()", () => {
@@ -52,5 +94,20 @@ describe("Transaction", () => {
         })
       ).rejects.toMatchObject({ message: /incorrect/ });
     });
+
+   
   });
+
+  describe("validate mining reward transaction", ()=> {
+    it("validates a mining reward transaction", ()=> {
+      expect(Transaction.validateMiningRewardTransaction({transaction: miningRewardTransaction})).resolves;
+    });
+
+    it("does not validate a mining reward transaction that was tampered with", ()=> {
+      miningRewardTransaction.value = 9001;
+      expect(Transaction.validateMiningRewardTransaction({transaction: miningRewardTransaction})).rejects.toMatchObject({message: /does not equal the official/})
+    });
+
+
+  })
 });

@@ -1,6 +1,7 @@
 const { keccakHash } = require('../util');
 const { GENESIS_DATA, MINE_RATE } = require('../config');
 const Transaction = require('../transaction');
+const Trie = require('../store/trie')
 
 const HASH_LENGTH = 64;
 const MAX_HASH_VALUE = parseInt('f'.repeat(HASH_LENGTH), 16);
@@ -41,8 +42,13 @@ class Block {
         transactionSeries,
         stateRoot }) {
         const target = Block.calculateBlockTargetHash({ lastBlock });
+        
+        const miningRewardTransaction = Transaction.createTransaction({beneficiary});
+        transactionSeries.push(miningRewardTransaction);
 
+        const transactionsTrie = Trie.buildTrie({items: transactionSeries});
         let timestamp, truncatedBlockHeaders, header, nonce, underTargetHash;
+
 
         do {
             timestamp = Date.now();
@@ -52,7 +58,7 @@ class Block {
                 difficulty: Block.adjustDifficulty({ lastBlock, timestamp }),
                 number: lastBlock.blockHeaders.number + 1,
                 timestamp,
-                transactionsRoot: keccakHash(transactionSeries),
+                transactionsRoot: transactionsTrie.rootHash,
                 stateRoot
             };
             header = keccakHash(truncatedBlockHeaders);
@@ -61,18 +67,18 @@ class Block {
             underTargetHash = keccakHash(header + nonce);
         } while (underTargetHash > target);
 
+         
         return new this({
             blockHeaders: { ...truncatedBlockHeaders, nonce },
             transactionSeries
         });
     }
 
-
     static genesis() {
         return new this(GENESIS_DATA);
     }
 
-    static validateBlock({ lastBlock, block }) {
+    static validateBlock({ lastBlock, block, state }) {
         return new Promise((resolve, reject) => {
             if (keccakHash(block) === keccakHash(Block.genesis())) {
                 return resolve();
@@ -96,6 +102,18 @@ class Block {
                 );
             };
 
+            //Do the transactionsSeries match the rootHash?
+            const rebuiltTransactionsTrie = Trie.buildTrie({items: block.transactionSeries});
+            
+            if (rebuiltTransactionsTrie.rootHash !== block.blockHeaders.transactionsRoot){
+                return reject(
+                    new Error(
+                        `The rebuilt transactions root does not the block's` +
+                        `transactions root: ${block.blockHeaders.transactionsRoot}`
+                    )
+                )
+            }
+
             const target = Block.calculateBlockTargetHash({ lastBlock });
 
             const { blockHeaders } = block;
@@ -113,6 +131,14 @@ class Block {
                 );
             };
 
+            //Are the transactions valid? (could the transactions be run against the current state?)
+            Transaction.validateTransactionSeries({
+                transactionSeries: block.transactionSeries,
+                state
+            })
+            .then(resolve)
+            .catch(reject)
+            
             return resolve();
         });
     }
