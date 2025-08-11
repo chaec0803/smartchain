@@ -1,5 +1,6 @@
 const { v4: uuid } = require("uuid");
 const Account = require("../account");
+const Interpreter = require('../interpreter');
 const { MINING_REWARD } = require("../config");
 
 const TRANSACTION_TYPE_MAP = {
@@ -183,6 +184,15 @@ class Transaction {
   static runStandardTransaction({ state, transaction }) {
     const fromAccount = state.getAccount({ address: transaction.from });
     const toAccount = state.getAccount({ address: transaction.to });
+      //getAccount with address as codeHash, which stores the full account
+
+    if (toAccount.codeHash){
+      const interpreter = new Interpreter();
+
+      const result = interpreter.runCode(toAccount.code);
+
+      console.log(` -*- Smart contract exectuion: ${transaction.id} - RESULT: ${result} `);
+    }
 
     const { value } = transaction;
 
