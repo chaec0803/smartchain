@@ -14,22 +14,22 @@ describe("Transaction", () => {
     account = new Account();
     toAccount = new Account();
     state = new State();
-    state.putAccount({address: account.address, accountData: account})
-    state.putAccount({address: toAccount.address, accountData: toAccount})
+    state.putAccount({ address: account.address, accountData: account });
+    state.putAccount({ address: toAccount.address, accountData: toAccount });
 
     standardTransaction = Transaction.createTransaction({
       account,
       to: toAccount.address,
       value: 50,
     });
-    
+
     createAccountTransaction = Transaction.createTransaction({
       account,
     });
 
     miningRewardTransaction = Transaction.createTransaction({
-      beneficiary: account.address
-    })
+      beneficiary: account.address,
+    });
   });
 
   describe("validateStandardTransaction()", () => {
@@ -37,7 +37,7 @@ describe("Transaction", () => {
       expect(
         Transaction.validateStandardTransaction({
           transaction: standardTransaction,
-          state
+          state,
         })
       ).resolves;
     });
@@ -48,34 +48,78 @@ describe("Transaction", () => {
       expect(
         Transaction.validateStandardTransaction({
           transaction: standardTransaction,
-          state
+          state,
         })
       ).rejects.toMatchObject({ message: /invalid/ });
     });
 
-     it('does not validate when the value exceeds the balance', ()=> {
+    it("does not validate when the value exceeds the balance", () => {
       standardTransaction = Transaction.createTransaction({
         account,
         to: toAccount.address,
-        value: 9001
+        value: 9001,
       });
-      expect(Transaction.validateStandardTransaction({
-        transaction: standardTransaction,
-        state
-      })).rejects.toMatchObject({message: /exceeds/ })
-    })
+      expect(
+        Transaction.validateStandardTransaction({
+          transaction: standardTransaction,
+          state,
+        })
+      ).rejects.toMatchObject({ message: /exceeds/ });
+    });
 
-    it('does not validate when the `to` address does not exist', ()=> {
+    it("does not validate when the `to` address does not exist", () => {
       standardTransaction = Transaction.createTransaction({
         account,
         to: "foo-recepient",
-        value: 10
+        value: 10,
       });
-      expect(Transaction.validateStandardTransaction({
-        transaction: standardTransaction,
-        state
-      })).rejects.toMatchObject({message: /does not exist/ })
-    })
+      expect(
+        Transaction.validateStandardTransaction({
+          transaction: standardTransaction,
+          state,
+        })
+      ).rejects.toMatchObject({ message: /does not exist/ });
+    });
+
+    it("does not validate when the gasLimit exceeds the balance", () => {
+      standardTransaction = Transaction.createTransaction({
+        account,
+        to: "foo-recepient",
+        gasLimit: 9001,
+      });
+
+      expect(
+        Transaction.validateStandardTransaction({
+          transaction: standardTransaction,
+          state,
+        })
+      ).rejects.toMatchObject({ message: /exceeds/ });
+    });
+
+    it("does not validate when the gasUsed exceeds the gasLimit", () => {
+      const codeHash = "foo-codeHash";
+      const code = ["PUSH", 1, "PUSH", 2, "ADD", "STOP"];
+
+      state.putAccount({
+        address: codeHash,
+        accountData: { code, codeHash },
+      });
+
+      standardTransaction = Transaction.createTransaction({
+        account,
+        to: codeHash,
+        gasLimit: 0,
+        codeHash,
+        code,
+      });
+
+      expect(
+        Transaction.validateStandardTransaction({
+          transaction: standardTransaction,
+          state,
+        })
+      ).rejects.toMatchObject({ message: /Transaction needs more gas/ });
+    });
   });
 
   describe("validateCreateAccountTransaction()", () => {
@@ -94,20 +138,24 @@ describe("Transaction", () => {
         })
       ).rejects.toMatchObject({ message: /incorrect/ });
     });
-
-   
   });
 
-  describe("validate mining reward transaction", ()=> {
-    it("validates a mining reward transaction", ()=> {
-      expect(Transaction.validateMiningRewardTransaction({transaction: miningRewardTransaction})).resolves;
+  describe("validate mining reward transaction", () => {
+    it("validates a mining reward transaction", () => {
+      expect(
+        Transaction.validateMiningRewardTransaction({
+          transaction: miningRewardTransaction,
+        })
+      ).resolves;
     });
 
-    it("does not validate a mining reward transaction that was tampered with", ()=> {
+    it("does not validate a mining reward transaction that was tampered with", () => {
       miningRewardTransaction.value = 9001;
-      expect(Transaction.validateMiningRewardTransaction({transaction: miningRewardTransaction})).rejects.toMatchObject({message: /does not equal the official/})
+      expect(
+        Transaction.validateMiningRewardTransaction({
+          transaction: miningRewardTransaction,
+        })
+      ).rejects.toMatchObject({ message: /does not equal the official/ });
     });
-
-
-  })
+  });
 });

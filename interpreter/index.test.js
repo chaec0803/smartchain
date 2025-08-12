@@ -7,7 +7,7 @@ describe("Interpreter", () => {
     describe("and the code includes ADD", () => {
       it("adds two values", () => {
         expect(
-          new Interpreter().runCode([PUSH, 2, PUSH, 3, ADD, STOP])
+          new Interpreter().runCode([PUSH, 2, PUSH, 3, ADD, STOP]).result
         ).toEqual(5);
       });
     });
@@ -15,7 +15,7 @@ describe("Interpreter", () => {
     describe("and the code includes SUB", () => {
       it("subtracts two values", () => {
         expect(
-          new Interpreter().runCode([PUSH, 2, PUSH, 3, SUB, STOP])
+          new Interpreter().runCode([PUSH, 2, PUSH, 3, SUB, STOP]).result
         ).toEqual(1);
       });
     });
@@ -23,7 +23,7 @@ describe("Interpreter", () => {
     describe("and the code includes MUL", () => {
       it("multiplies two values", () => {
         expect(
-          new Interpreter().runCode([PUSH, 2, PUSH, 3, MUL, STOP])
+          new Interpreter().runCode([PUSH, 2, PUSH, 3, MUL, STOP]).result
         ).toEqual(6);
       });
     });
@@ -31,47 +31,47 @@ describe("Interpreter", () => {
     describe("and the code includes DIV", () => {
       it("divides two values", () => {
         expect(
-          new Interpreter().runCode([PUSH, 2, PUSH, 3, DIV, STOP])
+          new Interpreter().runCode([PUSH, 2, PUSH, 3, DIV, STOP]).result
         ).toEqual(1.5);
       });
     });
 
     describe("and the code includes LT", () => {
       it("checks if one value is less than another", () => {
-        expect(new Interpreter().runCode([PUSH, 2, PUSH, 3, LT, STOP])).toEqual(
-          0
-        );
+        expect(
+          new Interpreter().runCode([PUSH, 2, PUSH, 3, LT, STOP]).result
+        ).toEqual(0);
       });
     });
 
     describe("and the code includes GT", () => {
       it("checks if one value is greater than another", () => {
-        expect(new Interpreter().runCode([PUSH, 2, PUSH, 3, GT, STOP])).toEqual(
-          1
-        );
+        expect(
+          new Interpreter().runCode([PUSH, 2, PUSH, 3, GT, STOP]).result
+        ).toEqual(1);
       });
     });
     describe("and the code includes EQ", () => {
       it("checks if one value is equal to another", () => {
-        expect(new Interpreter().runCode([PUSH, 2, PUSH, 3, EQ, STOP])).toEqual(
-          0
-        );
+        expect(
+          new Interpreter().runCode([PUSH, 2, PUSH, 3, EQ, STOP]).result
+        ).toEqual(0);
       });
     });
 
     describe("and the code includes AND", () => {
       it("ands two conditions", () => {
         expect(
-          new Interpreter().runCode([PUSH, 1, PUSH, 0, AND, STOP])
+          new Interpreter().runCode([PUSH, 1, PUSH, 0, AND, STOP]).result
         ).toEqual(0);
       });
     });
 
     describe("and the code includes OR", () => {
       it("ors two conditions", () => {
-        expect(new Interpreter().runCode([PUSH, 1, PUSH, 0, OR, STOP])).toEqual(
-          1
-        );
+        expect(
+          new Interpreter().runCode([PUSH, 1, PUSH, 0, OR, STOP]).result
+        ).toEqual(1);
       });
     });
 
@@ -88,7 +88,7 @@ describe("Interpreter", () => {
             PUSH,
             "jump successful",
             STOP,
-          ])
+          ]).result
         ).toEqual("jump successful");
       });
     });
@@ -108,7 +108,7 @@ describe("Interpreter", () => {
             PUSH,
             "jump successful",
             STOP,
-          ])
+          ]).result
         ).toEqual("jump successful");
       });
     });
