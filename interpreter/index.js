@@ -11,6 +11,8 @@ const AND = "AND";
 const OR = "OR";
 const JUMP = "JUMP";
 const JUMPI = "JUMPI";
+const STORE = "STORE";
+const LOAD = "LOAD";
 
 const OPCODE_MAP = {
   STOP,
@@ -26,6 +28,8 @@ const OPCODE_MAP = {
   OR,
   JUMP,
   JUMPI,
+  STORE,
+  LOAD,
 };
 
 const OPCODE_GAS_MAP = {
@@ -42,19 +46,23 @@ const OPCODE_GAS_MAP = {
   OR: 1,
   JUMP: 2,
   JUMPI: 2,
+  STORE: 5,
+  LOAD: 5,
 };
 
 const EXECUTION_COMPLETE = "Execution complete";
 const EXECUTION_LIMIT = 10000;
 
 class Interpreter {
-  constructor() {
+  constructor({storageTrie} = {}) {
     this.state = {
       programCounter: 0,
       stack: [],
       code: [],
       executionCount: 0,
     };
+
+    this.storageTrie = storageTrie;
   }
 
   jump() {
@@ -73,6 +81,8 @@ class Interpreter {
 
     let gasUsed = 0;
 
+    let value;
+    let key;
     while (this.state.programCounter < this.state.code.length) {
       this.state.executionCount++;
 
@@ -97,7 +107,7 @@ class Interpreter {
               throw new Error(`The 'PUSH' instruction cannot be last.`);
             }
 
-            const value = this.state.code[this.state.programCounter];
+            value = this.state.code[this.state.programCounter];
             this.state.stack.push(value);
             break;
           case ADD:
@@ -134,6 +144,19 @@ class Interpreter {
             if (condition === 1) {
               this.jump();
             }
+            break;
+          case STORE:
+            key = this.state.stack.pop();
+            value = this.state.stack.pop();
+
+            this.storageTrie.put({key, value});
+
+            break;
+          case LOAD:
+            key = this.state.stack.pop();  
+            value = this.storageTrie.get({key});
+
+            this.state.stack.push(value);
             break;
           default:
             break;

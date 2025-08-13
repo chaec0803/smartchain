@@ -207,7 +207,9 @@ class Transaction {
     let result = 0;
 
     if (toAccount.codeHash) {
-      const interpreter = new Interpreter();
+      const interpreter = new Interpreter({
+        storageTrie: state.storageTrieMap[toAccount.codeHash]
+      });
 
       ({ gasUsed, result } = interpreter.runCode(toAccount.code));
 
